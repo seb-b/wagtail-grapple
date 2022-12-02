@@ -12,13 +12,19 @@ def get_middleware_resolvers(middlewares):
     for middleware in middlewares:
         if inspect.isfunction(middleware):
             yield middleware
-        if not hasattr(middleware, MIDDLEWARE_RESOLVER_FUNCTION):
+        elif inspect.isclass:
+            if hasattr(middleware, MIDDLEWARE_RESOLVER_FUNCTION):
+                yield getattr(middleware(), MIDDLEWARE_RESOLVER_FUNCTION)
+            else:
+                raise AttributeError(
+                    f"Middleware {middleware} must have a {MIDDLEWARE_RESOLVER_FUNCTION} function"
+                )
+        else:
             raise Exception(
                 "Middleware must be either a class or a function. Got: {}.\nYou can read more about middleware here: https://docs.graphene-python.org/en/latest/execution/middleware/".format(
                     type(middleware)
                 )
             )
-        yield getattr(middleware(), MIDDLEWARE_RESOLVER_FUNCTION)
 
 
 class IsAuthenticatedMiddleware(object):
@@ -48,6 +54,8 @@ class GrappleMiddleware(object):
         parent_name = info.parent_type.name
         if field_name in self.field_middlewares and parent_name in ROOT_TYPES:
             for middleware in self.field_middlewares[field_name]:
-                return middleware(next, root, info, **args)
+                response = middleware(next, root, info, **args)
+                if not response:
+                    return None
 
         return next(root, info, **args)

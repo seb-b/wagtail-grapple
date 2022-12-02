@@ -2,7 +2,7 @@ import uuid
 
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, override_settings
-from home.factories import BlogPageFactory, SimpleModelFactory
+from home.factories import BlogPageFactory, SimpleModelFactory, MiddlewareModelFactory
 
 from example.tests.test_grapple import BaseGrappleTest
 
@@ -94,6 +94,7 @@ class TestRegisterQueryField(BaseGrappleTest):
         self.blog_post = BlogPageFactory(parent=self.home, slug="post-one")
         self.another_post = BlogPageFactory(parent=self.home, slug="post-two")
         self.child_post = BlogPageFactory(parent=self.another_post, slug="post-one")
+        self.middleware_instance = MiddlewareModelFactory()
 
     def test_query_field_plural(self):
         query = """
@@ -184,6 +185,23 @@ class TestRegisterQueryField(BaseGrappleTest):
         )
         data = results["data"]["post"]
         self.assertEqual(data, None)
+
+    def test_multiple_middleware(self):
+        query = """
+        query ($id: Int) {
+            middlewareModel(id: $id) {
+                id
+            }
+        }            
+        """
+        results = self.client.execute(
+            query, variables={'id': 1}, context_value=self.request)
+        # Check that both middleware ran ok, value returned means the assert passed in middleware_2
+        self.assertEqual(int(results["data"]["middlewareModel"]["id"]), 1)
+        results = self.client.execute(
+            query, variables={'id': 2}, context_value=self.request)
+        # Check that the second middleware failed when id = 2
+        self.assertEqual(results["data"]["middlewareModel"], None)
 
 
 class TestRegisterPaginatedQueryField(BaseGrappleTest):
