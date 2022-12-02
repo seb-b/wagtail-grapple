@@ -12,7 +12,7 @@ def get_middleware_resolvers(middlewares):
     for middleware in middlewares:
         if inspect.isfunction(middleware):
             yield middleware
-        elif inspect.isclass:
+        elif inspect.isclass(middleware):
             if hasattr(middleware, MIDDLEWARE_RESOLVER_FUNCTION):
                 yield getattr(middleware(), MIDDLEWARE_RESOLVER_FUNCTION)
             else:
