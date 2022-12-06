@@ -1,3 +1,4 @@
+from functools import partial
 import inspect
 
 from graphene import ResolveInfo
@@ -53,9 +54,8 @@ class GrappleMiddleware(object):
         field_name = info.field_name
         parent_name = info.parent_type.name
         if field_name in self.field_middlewares and parent_name in ROOT_TYPES:
-            for middleware in self.field_middlewares[field_name]:
-                response = middleware(next, root, info, **args)
-                if not response:
-                    return None
+            middlewares = self.field_middlewares[field_name].copy()
+            while middlewares:
+                next = partial(middlewares.pop(), next)
 
         return next(root, info, **args)

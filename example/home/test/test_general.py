@@ -2,7 +2,7 @@ import uuid
 
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, override_settings
-from home.factories import BlogPageFactory, SimpleModelFactory, MiddlewareModelFactory
+from home.factories import BlogPageFactory, MiddlewareModelFactory, SimpleModelFactory
 
 from example.tests.test_grapple import BaseGrappleTest
 
