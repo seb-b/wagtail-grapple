@@ -192,14 +192,16 @@ class TestRegisterQueryField(BaseGrappleTest):
             middlewareModel(id: $id) {
                 id
             }
-        }            
+        }
         """
         results = self.client.execute(
-            query, variables={'id': 1}, context_value=self.request)
-        # Check that both middleware ran ok, value returned means the assert passed in middleware_2
+            query, variables={"id": 1}, context_value=self.request
+        )
+        # Check that both middleware ran ok, value returned means the check for middleware_1 passed in middleware_2
         self.assertEqual(int(results["data"]["middlewareModel"]["id"]), 1)
         results = self.client.execute(
-            query, variables={'id': 2}, context_value=self.request)
+            query, variables={"id": 2}, context_value=self.request
+        )
         # Check that the second middleware failed when id = 2
         self.assertEqual(results["data"]["middlewareModel"], None)
 

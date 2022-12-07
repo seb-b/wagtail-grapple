@@ -1,5 +1,5 @@
-from functools import partial
 import inspect
+from functools import partial
 
 from graphene import ResolveInfo
 from graphql.execution.middleware import MIDDLEWARE_RESOLVER_FUNCTION
